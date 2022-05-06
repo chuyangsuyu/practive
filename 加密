@@ -1,0 +1,28 @@
+import execjs
+import requests
+import jsonpath
+
+url = 'https://fanyi.baidu.com/v2transapi?from=zh&to=en'
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36',
+    'referer': 'https://fanyi.baidu.com/',
+    'Cookie': 'BIDUPSID=27439B939829C5FCA81E53ED4B3C8E9B; PSTM=1648026019; REALTIME_TRANS_SWITCH=1; FANYI_WORD_SWITCH=1; SOUND_SPD_SWITCH=1; SOUND_PREFER_SWITCH=1; HISTORY_SWITCH=1; APPGUIDE_10_0_2=1; BAIDUID=5310961810E3A6B7E2A08ECBA79D79FF:FG=1; MCITY=-158%3A; BDSFRCVID_BFESS=Cl0OJeC626ePoEbDHXA6IGgN3ZZaA_OTH6aoEGsh4KfvBvuxkGi7EG0P8x8g0KubwY9togKKLmOTHpKF_2uxOjjg8UtVJeC6EG0Ptf8g0f5; H_BDCLCKID_SF_BFESS=tb4tVC_KfI83fP36q4of5ttt5huX5-Cs0Ktj2hcH0KLKMR5MhUoDQMkRLHjA0-bwtaQz3lj7BMb1MRjvQfJ5M50UbljG-JQO22v0_h5TtUtWJKnTDMRh-R-4eqOyKMniBIj9-pnMWhQrh459XP68bTkA5bjZKxtq3mkjbPbDfn02eCKu-n5jHj5yjGKj3f; BDORZ=B490B5EBF6F3CD402E515D22BCDA1598; BAIDUID_BFESS=5310961810E3A6B7E2A08ECBA79D79FF:FG=1; BA_HECTOR=2la40h0ga0218501et1h76q1f0q; RT="z=1&dm=baidu.com&si=k79vhl7mif9&ss=l2slpsyy&sl=5&tt=2ow&bcn=https%3A%2F%2Ffclog.baidu.com%2Flog%2Fweirwood%3Ftype%3Dperf&ld=9qky&ul=9rhp&hd=9rjy"; Hm_lvt_64ecd82404c51e03dc91cb9e8c025574=1649847845,1651320678,1651732756,1651754292; Hm_lpvt_64ecd82404c51e03dc91cb9e8c025574=1651754292; ab_sr=1.0.1_ODQyNzg1NWE3NjQ1MDhmMGMzMGZmM2I4NDI2NTNmZDI3MDVhNTYwYmU0OTYwYjkxMDYyYjBkNjQwZTVmZjAxMzVkNWQyZDAxYzU5Njc1ZTY0Y2MwNGMxMWIwYWU2NjdlMDIwYWJjOTM3YzYyZDY4YmVmZjgzOGE0NGZlNzVjODkwZWQ1YTU4ZmVjZWEwMWNlMjZmM2U4NTVhOTk2Y2FjZQ=='
+}
+word = input('请输入要翻译的内容：')
+with open('baidutranslation.js', 'r', encoding='utf-8')as f:
+    js_code = f.read()
+js_obj = execjs.compile(js_code)
+sign = js_obj.call('e', word)
+# print(sign)
+data = {
+    "from": 'auto',
+    "to": 'auto',
+    "query": word,      # 需要翻译的内容
+    "sign": sign,    # 经过分析，sign就是需要查找的目标参数生成
+    "token": "16c5ab95d57c28c8baec3675e5015e4a",
+}
+response = requests.post(url, headers=headers, data=data)
+# print(response.json())
+json_data = response.json()
+result = jsonpath.jsonpath(json_data, '$..dst')
+print(result)
